@@ -327,17 +327,6 @@ namespace pl8::assembler {
                 push_instruction(regist);
             }
 
-            else if (keyword == "load"){
-                auto [type, value] = expect_value(false);
-                if (type == TT_REGIST){
-                    push_instruction(inst::LDR);
-                    push_instruction(value);
-                } else {
-                    push_instruction(inst::LD);
-                    push_instruction(value);
-                }
-            }
-
             else if (keyword == "syscall"){
                 int syscall = expect_constant_int();
 
@@ -407,6 +396,8 @@ namespace pl8::assembler {
 
                 push_instruction(inst::JZ);
                 schedule_jump(label_name);
+                expect_comma();
+                expect_value_and_push();
             }
 
             else if (keyword == "jnz"){
@@ -414,6 +405,8 @@ namespace pl8::assembler {
 
                 push_instruction(inst::JNZ);
                 schedule_jump(label_name);
+                expect_comma();
+                expect_value_and_push();
             }
 
             else if (keyword == "call"){
@@ -438,6 +431,9 @@ namespace pl8::assembler {
 
             else if (keyword == "add"){
                 push_instruction(inst::ADD);
+                int regist = expect_register();
+                push_instruction(regist);
+                expect_comma();
                 expect_value_and_push();
                 expect_comma();
                 expect_value_and_push();
@@ -445,6 +441,9 @@ namespace pl8::assembler {
 
             else if (keyword == "sub"){
                 push_instruction(inst::SUB);
+                int regist = expect_register();
+                push_instruction(regist);
+                expect_comma();
                 expect_value_and_push();
                 expect_comma();
                 expect_value_and_push();
@@ -452,6 +451,9 @@ namespace pl8::assembler {
 
             else if (keyword == "mul"){
                 push_instruction(inst::MUL);
+                int regist = expect_register();
+                push_instruction(regist);
+                expect_comma();
                 expect_value_and_push();
                 expect_comma();
                 expect_value_and_push();
@@ -459,6 +461,9 @@ namespace pl8::assembler {
 
             else if (keyword == "div"){
                 push_instruction(inst::DIV);
+                int regist = expect_register();
+                push_instruction(regist);
+                expect_comma();
                 expect_value_and_push();
                 expect_comma();
                 expect_value_and_push();
@@ -466,6 +471,9 @@ namespace pl8::assembler {
 
             else if (keyword == "pow"){
                 push_instruction(inst::POW);
+                int regist = expect_register();
+                push_instruction(regist);
+                expect_comma();
                 expect_value_and_push();
                 expect_comma();
                 expect_value_and_push();
@@ -474,6 +482,9 @@ namespace pl8::assembler {
             // heap stuff
             else if (keyword == "allc"){
                 push_instruction(inst::ALLC);
+                int regist = expect_register();
+                push_instruction(regist);
+                expect_comma();
                 expect_value_and_push();
             }
 
@@ -482,24 +493,35 @@ namespace pl8::assembler {
                 expect_value_and_push();
                 expect_comma();
                 expect_value_and_push();
+                expect_comma();
+                expect_value_and_push();
             }
 
             else if (keyword == "getx"){
                 push_instruction(inst::RD);
                 expect_value_and_push();
+                expect_comma();
+                expect_value_and_push();
+                int regist = expect_register();
+                push_instruction(regist);
             }
 
             else if (keyword == "fill"){
                 push_instruction(inst::SETA);
                 expect_value_and_push();
+                expect_comma();
+                expect_value_and_push();
             }
 
             else if (keyword == "str"){
+                auto [tokType, addr] = expect_value();
+                expect_comma();
                 std::string value = expect_string();
 
                 int counter = 0;
                 while (counter < value.size()){
                     push_instruction(inst::WR);
+                    push_value(tokType, addr);
                     push_value(value_mode::CONSTANT, counter);
                     push_value(value_mode::CONSTANT, (unsigned char) value[counter]);
                     counter++;
@@ -526,6 +548,14 @@ namespace pl8::assembler {
         void push_value(int type, int value){
             program[pc++] = type;
             if (type != value_mode::ACCUM) program[pc++] = value;
+        }
+
+        void push_value(TokenType type, int value){
+            if (type == TT_REGIST){
+                push_value(value_mode::REGIST, value);
+            } else {
+                push_value(value_mode::CONSTANT, value);
+            }
         }
 
         int expect_register(){
@@ -591,7 +621,7 @@ namespace pl8::assembler {
                 return { TT_INT, expect_constant_int() };
             }
 
-            if (current.type != TT_INT && current.type != TT_REGIST && (with_accum && current.type != TT_ACCUM)){
+            if (current.type != TT_INT && current.type != TT_REGIST){
                 compilation_fault("expected int or register.", current.pos);
             }
 
@@ -603,18 +633,7 @@ namespace pl8::assembler {
 
         void expect_value_and_push(){
             auto [type, value] = expect_value();
-
-            if (type == TT_REGIST){
-                push_instruction(value_mode::REGIST);
-                push_instruction(value);
-            }
-            else if (type == TT_ACCUM){
-                push_instruction(value_mode::ACCUM);
-            } 
-            else {
-                push_instruction(value_mode::CONSTANT);
-                push_instruction(value);
-            }
+            push_value(type, value);
         }
 
         void schedule_jump(std::string label_name){

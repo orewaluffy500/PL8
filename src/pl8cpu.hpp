@@ -79,7 +79,6 @@ namespace pl8 {
     struct VirtualMachine {
         int pc = 0;
         int addr_counter = 0;
-        int accum = 0;
 
         ArithOperInfo ao_info;
         CompInfo comp_info;
@@ -106,17 +105,11 @@ namespace pl8 {
             
             if (mode == value_mode::REGIST){
                 return get_register(get_next());
-            } 
-            else if (mode == value_mode::ACCUM){
-                return loaded();
             }
             else {
                 return get_next();
             }
         }
-
-        int loaded(){ return accum; }
-        void load(int value){ accum = value; }
         
         int get_register(int index){
             if (index < 0 || index >= REGISTER_COUNT){
@@ -153,23 +146,7 @@ namespace pl8 {
                 return false;
             }
 
-            // LOADING
-            case inst::LD: {
-                int value = get_next();
-                load(value);
-                break;
-            }
-            case inst::LDR: {
-                int regs = get_next();
-                load(get_register(regs));
-                break;
-            }
-
             // REGISTERS
-            case inst::SETR: {
-                set_register(get_next(), loaded());
-                break;
-            }
             case inst::MOV: {
                 int regist = get_next();
                 int value = get_next_value();
@@ -191,21 +168,23 @@ namespace pl8 {
 
             // ALLOCATIONS
             case inst::ALLC: {
+                int out = get_next();
                 int size = get_next_value();
-                load(addr_counter);
+                set_register(out, addr_counter);
                 allocate(size);
                 break;
             }
             case inst::RD: {
-                int addr = loaded();
+                int addr = get_next_value();
                 int index = get_next_value();
+                int out = get_next();
                 auto& alloc = get_alloc(addr);
 
-                load(alloc.get(index));
+                set_register(out, alloc.get(index));
                 break;
             }
             case inst::WR: {
-                int addr = loaded();
+                int addr = get_next_value();
                 int index = get_next_value();
                 int value = get_next_value();
                 auto& alloc = get_alloc(addr);
@@ -215,7 +194,7 @@ namespace pl8 {
                 break;
             }
             case inst::SETA: {
-                int addr = loaded();
+                int addr = get_next_value();
                 int value = get_next_value();
                 auto& alloc = get_alloc(addr);
 
@@ -255,13 +234,13 @@ namespace pl8 {
 
             case inst::JZ: {
                 int where = get_next();
-                if (loaded() == 0) jump(where);
+                if (get_next_value() == 0) jump(where);
                 break;
             }
 
             case inst::JNZ: {
                 int where = get_next();
-                if (loaded() != 0) jump(where);
+                if (get_next_value() != 0) jump(where);
                 break;
             }
 
@@ -316,36 +295,51 @@ namespace pl8 {
 
             case inst::ADD: {
                 ao_info.type = ArithOper::ADD;
-                ao_info.feed(get_next_value(), get_next_value());
-                load(ao_info.evaluate());
+                int out = get_next();
+                int operand1 = get_next_value();
+                int operand2 = get_next_value();
+                ao_info.feed(operand1, operand2);
+                set_register(out, ao_info.evaluate());
                 break;
             }
 
             case inst::SUB: {
                 ao_info.type = ArithOper::SUB;
-                ao_info.feed(get_next_value(), get_next_value());
-                load(ao_info.evaluate());
+                int out = get_next();
+                int operand1 = get_next_value();
+                int operand2 = get_next_value();
+                ao_info.feed(operand1, operand2);
+                set_register(out, ao_info.evaluate());
                 break;
             }
 
             case inst::MUL: {
                 ao_info.type = ArithOper::MUL;
-                ao_info.feed(get_next_value(), get_next_value());
-                load(ao_info.evaluate());
+                int out = get_next();
+                int operand1 = get_next_value();
+                int operand2 = get_next_value();
+                ao_info.feed(operand1, operand2);
+                set_register(out, ao_info.evaluate());
                 break;
             }
 
             case inst::DIV: {
                 ao_info.type = ArithOper::DIV;
-                ao_info.feed(get_next_value(), get_next_value());
-                load(ao_info.evaluate());
+                int out = get_next();
+                int operand1 = get_next_value();
+                int operand2 = get_next_value();
+                ao_info.feed(operand1, operand2);
+                set_register(out, ao_info.evaluate());
                 break;
             }
 
             case inst::POW: {
                 ao_info.type = ArithOper::POW;
-                ao_info.feed(get_next_value(), get_next_value());
-                load(ao_info.evaluate());
+                int out = get_next();
+                int operand1 = get_next_value();
+                int operand2 = get_next_value();
+                ao_info.feed(operand1, operand2);
+                set_register(out, ao_info.evaluate());
                 break;
             }
             }
@@ -388,35 +382,33 @@ namespace pl8 {
             });
 
             set_syscall(std_syscall::PINT, [](auto& vm){
-                std::cout << vm.loaded();
+                std::cout << vm.get_register(128);
             });
 
             set_syscall(std_syscall::PCHAR, [](auto& vm){
-                std::cout << (char) vm.loaded();
+                std::cout << (char) vm.get_register(128);
             });
 
             set_syscall(std_syscall::PSTR, [](auto& vm){
-                int addr = vm.loaded();
+                int addr = vm.get_register(128);
                 auto& alloc = vm.get_alloc(addr);
                 int index = 0;
                 while (index < alloc.size && alloc.get(index) != 0){
                     std::cout << (char) alloc.get(index);
                     index++;
                 }
-
-                std::fflush(stdout);
             });
 
             set_syscall(std_syscall::RINT, [](auto& vm){
                 int x;
                 std::cin >> x;
-                vm.load(x);
+                vm.set_register(128, x);
             });
 
             set_syscall(std_syscall::RCHAR, [](auto& vm){
                 char x;
                 std::cin >> x;
-                vm.load(x);
+                vm.set_register(128, x);
             });
 
             set_syscall(std_syscall::RSTR, [](auto& vm){
@@ -424,7 +416,7 @@ namespace pl8 {
                 std::cin >> std::ws;
                 std::getline(std::cin, x);
 
-                auto& alloc = vm.get_alloc(vm.loaded());
+                auto& alloc = vm.get_alloc(vm.get_register(128));
 
                 std::copy_n(
                     x.begin(),
@@ -434,7 +426,7 @@ namespace pl8 {
             });
 
             set_syscall(std_syscall::SLEN, [](auto& vm){
-                Allocation& alloc = vm.get_alloc(vm.loaded());
+                Allocation& alloc = vm.get_alloc(vm.get_register(128));
 
                 int counter = 0;
                 while (counter < alloc.size){
@@ -442,7 +434,7 @@ namespace pl8 {
                     counter++;
                 }
 
-                vm.load(counter);
+                vm.set_register(128, counter);
             });
         }
     };

@@ -2,31 +2,27 @@
 
 <const> : a literal value
 <index> : an <index> to a register
-<value> : either "CONSTANT, <const>" or "ACCUM" or "REGIST, <index>"
+<value> : either "CONSTANT, <const>" or "REGIST, <index>"
 
 <( OPCODES )>
 
 
 HLT     : OPCODE                    # exit program immediately
 
-LD      : OPCODE <const>            # load constant into accum
-LDR     : OPCODE <index>            # load value of register at <index> into accum
-
-SETR    : OPCODE <index>            # copy the accum's value into given register
 MOV     : OPCODE <index> <value>    # copy <value> into given register.
 INCR    : OPCODE <index>            # increment given register
 DECR    : OPCODE <index>            # decrement given register
 
-ALLC    : OPCODE <value>            # allocate memory, use <value> as the size and write address into accum.
-RD      : OPCODE <value>            # use accum as the memory address, <value> is the index, read into accum
-WR      : OPCODE <value1> <value2>  # use accum as the memory address, <value1> is the index, <value2> is the <value>.
-SETA    : OPCODE <value>            # use accum as the memory address, fill given allocation with <value>
+ALLC    : OPCODE <index> <value>            # allocate memory, use <value> as the size and write address into accum.
+RD      : OPCODE <value> <value1> <index>   # use <value> as the memory address, <value> is the index, read into <index>
+WR      : OPCODE <value> <value1> <value2>  # use <value> as the memory address, <value1> is the index, <value2> is the <value>.
+SETA    : OPCODE <value> <value1>           # use <value> as the memory address, fill given allocation with <value>
 
 JMP     : OPCODE <const>            # jump to <const> in program memory
 CALL    : OPCODE <const>            # jump to <const> in program memory and push original PC onto call stack
 RET     : OPCODE                    # return to the PC at the top of the call stack or do nothing if call stack is empty
-JZ      : OPCODE <const>            # jump if accum is zero
-JNZ     : OPCODE <const>            # jump if accum isn't zero
+JZ      : OPCODE <const> <value>    # jump if <value> is zero
+JNZ     : OPCODE <const> <value>    # jump if <value> isn't zero
 CMP     : OPCODE <value1> <value2>  # compare two values and store the comparison results
 JL      : OPCODE                    # jump if comparison result was less than
 JG      : OPCODE                    # jump if comparison result was greater than
@@ -35,11 +31,11 @@ JGE     : OPCODE                    # jump if comparison result was greater than
 JE      : OPCODE                    # jump if comparison result was equal
 JNE     : OPCODE                    # jump if comparison result wasn't equal
 
-ADD     : OPCODE <value1> <value2>  # add operands and result into accum.
-SUB     : OPCODE <value1> <value2>  # subtract operands and result into accum.
-DIV     : OPCODE <value1> <value2>  # divide operands and result into accum.
-MUL     : OPCODE <value1> <value2>  # multiply operands and result into accum.
-POW     : OPCODE <value1> <value2>  # power operands and result into accum.
+ADD     : OPCODE <index> <value1> <value2>  # add operands and result into <index>.
+SUB     : OPCODE <index> <value1> <value2>  # subtract operands and result into <index>.
+DIV     : OPCODE <index> <value1> <value2>  # divide operands and result into <index>.
+MUL     : OPCODE <index> <value1> <value2>  # multiply operands and result into <index>.
+POW     : OPCODE <index> <value1> <value2>  # power operands and result into <index>.
 
 SYSCALL : OPCODE syscall            # do a syscall.
 

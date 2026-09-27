@@ -12,9 +12,6 @@ namespace pl8 {
         constexpr int HLT           = 0x01;
         constexpr int SYSCALL       = 0x02;
 
-        constexpr int LD            = 0x10;
-        constexpr int LDR           = 0x11;
-
         constexpr int JMP           = 0x20;
         constexpr int CALL          = 0x21;
         constexpr int RET           = 0x22;

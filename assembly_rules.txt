@@ -22,28 +22,23 @@ Allocations are basically arrays and you store their addresses not the allocatio
 
 "[string]"      : a string constant
                 ex. - "hello", "bye"
-            
-[accum]         : a '$' character, represents the current value in the accumulator
 
-[value]         : either a [constant] or a [register] or an [accum]
+[value]         : either a [constant] or a [register]
 
 [identifier]    : the name of a label or others.
 
 <( INSTRUCTIONS )>
 
-mov [register], [value]      : set a register
-dup [register], [register]      : duplicate value of 1st register to 2nd register
+mov [register], [value]         : set a register
 incr [register]                 : increment a register
 decr [register]                 : decrement a register
-
-load [value]                    : load a value into the accumulator
 
 jmp [identifier]                : jump to a label
 call [identifier]               : jump to a label and push pc onto stack
 ret                             : pop the top pc off the call stack and return to it
 
-jz [identifier]                 : jump to a label if accum is zero
-jnz [identifier]                : jump to a label if accum isn't zero
+jz [identifier], [value]        : jump to a label if [value] is zero
+jnz [identifier], [value]       : jump to a label if [value] isn't zero
 
 cmp [value], [value]            : compare two values and store results
 je [identifier]                 : jump to a label if comparison result in equality
@@ -53,17 +48,17 @@ jge [identifier]                : jump to a label if comparison result in greate
 jl [identifier]                 : jump to a label if comparison result in less
 jle [identifier]                : jump to a label if comparison result in less or equal
 
-add [value], [value]            : add two values and put result in accumulator
-sub [value], [value]            : subtract two values and put result in accumulator
-mul [value], [value]            : multiply two values and put result in accumulator
-div [value], [value]            : divide two values and put result in accumulator
-pow [value], [value]            : power two values and put result in accumulator
+add [index], [value], [value]   : add two values and put result in [index]
+sub [index], [value], [value]   : subtract two values and put result in [index]
+mul [index], [value], [value]   : multiply two values and put result in [index]
+div [index], [value], [value]   : divide two values and put result in [index]
+pow [index], [value], [value]   : power two values and put result in [index]
 
-allc [value]                    : allocate [value] amount of space and put the address in accumulator
-setx [value], [value]           : set an element of an allocation, accumulator is the address
-getx [value]                    : get the element of an allocation back into the accumulator, accumulator is the address
-fill [value]                    : fill an allocation with a value, accumulator is the address
-str "[string]"                  : expands into `setx` instructions that set each element of the currently loaded allocation (in accum) 
+allc [index], [value1]          : allocate [value] amount of space and put the address in [index]
+setx [value], [value1], [value2]: set an element of an allocation, [value] is the address
+getx [value], [value1], [index] : get the element of an allocation into [index], [value] is the address
+fill [value], [value1]          : fill an allocation with a value, [value] is the address
+str [value], "[string]"         : expands into `setx` instructions that set each element of the allocation who's address is in [value]
                                 to each character of the given string.
                                 very useful.
 
@@ -78,52 +73,16 @@ nop                             : does nothing, can be used as padding in the ma
 
 256 : print the word "soup"
 
-257 : print the accumulator as an integer
+257 : print r128 as an integer
 
-258 : print the accumulator as an ASCII character
+258 : print r128 as an ASCII character
 
-259 : print the allocation who's address is stored in the accumulator as a string (each element is an ASCII char)
+259 : print the allocation who's address is stored in r128 as a string (each element is an ASCII char)
 
-260 : take the allocation who's address is stored in the accumulator, measure it's length as a string and load that into the accumulator
+260 : take the allocation who's address is stored in r128, measure it's length as a string and load that into r128
 
 512 : read an integer
 
 513 : read an ASCII character
 
-514 : read a string into the allocation who's address is stored in the accumulator
-
-
-<( EXAMPLE: Greeter )>
-
-This example reads a string, stores it, prints a temporary string ("hello, ") and then prints the previous string which was the name.
-
-```
-label _main_
-    allc 64
-    syscall 514     ; read the name
-    mov .0, $       ; store the string address in register 0
-
-    allc 32
-    str "hello, "   ; make a new string
-    syscall 259     ; print it
-
-    ; we'll override the accumulator (which currently holds address for greet string)
-    ; since we don't need to store the greeting string. ("hello, ")
-    load .0
-
-    ; now print the name
-    syscall 259
-
-    ; and finally we'll print a newline
-    load 10         ; line feed ASCII code
-    syscall 258     ; print as ASCII
-
-label _exit_
-    hlt
-```
-
---  Output  --
-jack
-hello, jack
-
---------------
+514 : read a string into the allocation who's address is stored in r128

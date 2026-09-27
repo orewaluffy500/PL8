@@ -1,6 +1,16 @@
-label _main_
-    load '\a'
-    syscall 258
+    syscall 512
+    jz zero, .128
+    jnz unzero, .128
+    hlt
 
-label _exit_
+label zero
+    allc .128, 128
+    str .128, "its zero"
+    syscall 259
+    hlt
+
+label unzero
+    allc .128, 128
+    str .128, "its not zero"
+    syscall 259
     hlt
