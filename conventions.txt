@@ -1,0 +1,8 @@
+I made a few conventions for PL8 assembly.
+
+-   You should put the main code in a _main_ label.
+
+-   You should put the terminal code in an _exit_ label, This way you can also easily jump to a universal exit
+
+-   Registers 96 - 128 are reserved for local stuff, You shouldn't rely on them for storage because a label might modify them
+    basically they are used as temporary registers, registers 96 to 128.

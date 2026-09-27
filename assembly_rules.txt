@@ -1,5 +1,10 @@
 PL8 assembly is very simple.
 
+
+There are registers 0 to 128 (129 registers in total).
+Allocations are basically arrays and you store their addresses not the allocation itself.
+
+
 <( GRAMMAR DEFINITIONS )>
 
 [register]      : an index of a register, prefixed with a dot
@@ -25,7 +30,6 @@ incr [register]                 : increment a register
 decr [register]                 : decrement a register
 
 load [value]                    : load a value into the accumulator
-dmp [register]                  : dump the value of the accumulator into a register
 
 jmp [identifier]                : jump to a label
 call [identifier]               : jump to a label and push pc onto stack
@@ -60,3 +64,59 @@ label [identifier]              : define a label
 
 hlt                             : halt the program immediately
 nop                             : does nothing, can be used as padding in the machine code
+
+
+
+<( SYSCALLS )>
+
+256 : print the word "soup"
+
+257 : print the accumulator as an integer
+
+258 : print the accumulator as an ASCII character
+
+259 : print the allocation who's address is stored in the accumulator as a string (each element is an ASCII char)
+
+260 : take the allocation who's address is stored in the accumulator, measure it's length as a string and load that into the accumulator
+
+512 : read an integer
+
+513 : read an ASCII character
+
+514 : read a string into the allocation who's address is stored in the accumulator
+
+
+<( EXAMPLE: Greeter )>
+
+This example reads a string, stores it, prints a temporary string ("hello, ") and then prints the previous string which was the name.
+
+```
+label _main_
+    allc 64
+    syscall 514     ; read the name
+    mov .0, $       ; store the string address in register 0
+
+    allc 32
+    str "hello, "   ; make a new string
+    syscall 259     ; print it
+
+    ; we'll override the accumulator (which currently holds address for greet string)
+    ; since we don't need to store the greeting string. ("hello, ")
+    load .0
+
+    ; now print the name
+    syscall 259
+
+    ; and finally we'll print a newline
+    load 10         ; line feed ASCII code
+    syscall 258     ; print as ASCII
+
+label _exit_
+    hlt
+```
+
+--  Output  --
+jack
+hello, jack
+
+--------------

@@ -1,8 +1,22 @@
 label _main_
     allc 64
-    syscall 514 ; read
-    syscall 260 ; lengthen string
-    syscall 257 ; print length
+    syscall 514     ; read the name
+    mov .0, $       ; store the string address in register 0
+
+    allc 32
+    str "hello, "   ; make a new string
+    syscall 259     ; print it
+
+    ; we'll override the accumulator (which currently holds address for greet string)
+    ; since we don't need to store the greeting string. ("hello, ")
+    load .0
+
+    ; now print the name
+    syscall 259
+
+    ; and finally we'll print a newline
+    load 10         ; line feed ASCII code
+    syscall 258     ; print as ASCII
 
 label _exit_
     hlt

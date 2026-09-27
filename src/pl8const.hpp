@@ -5,7 +5,7 @@
 #include <string>
 namespace pl8 {
     constexpr int PROGRAM_SIZE = 16384;
-    constexpr int REGISTER_COUNT = 32;
+    constexpr int REGISTER_COUNT = 129;
 
     namespace inst {
         constexpr int NOP           = 0x00;
