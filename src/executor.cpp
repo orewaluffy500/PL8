@@ -5,7 +5,7 @@
 #include <vector>
 int main(){
     std::string filename;
-    std::cout << "app file? ";
+    std::cout << "app file (make sure its UTF-8)? ";
     std::getline(std::cin, filename);
 
     std::ifstream file(filename);

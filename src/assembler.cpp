@@ -6,7 +6,7 @@ int main(int argc, char** argv){
     // read file
 
     std::string filename;
-    std::cout << "file? ";
+    std::cout << "file (make sure its UTF-8) ? ";
     std::getline(std::cin, filename);
 
     std::ifstream file(filename);
