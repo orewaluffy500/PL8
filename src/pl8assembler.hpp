@@ -158,7 +158,7 @@ namespace pl8::assembler {
                     advance();
                 }
                 else {
-                    fault(std::format("illegal character '{}'", current), pos);
+                    advance();
                 }
             }
 
