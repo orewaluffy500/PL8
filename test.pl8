@@ -1,44 +1,6 @@
 label _main_
-    allc 64
-    mov .10, $          ; store array in reg 10
-    mov .11, 64         ; length in reg 11
-    mov .12, 0          ; iterator in reg 12
-    call register
-    call list
-
-    jmp _exit_
-
-label register
-    allc 128
-    str "enter a name: "
-    syscall 259
-    fill 0
-    syscall 514
-
-    ; store name
-    mov .96, $
-    load .10
-    setx .12, .96
-    incr .12            ; increment iterator
-
-    allc 128
-    str "type 0 if you want to stop: "
-    syscall 259
-    syscall 512
-
-    ; if not zero
-    jnz register        ; redo
-    ret                 ; otherwise return.
-
-label list
-    load .10
-    getx .0
-    syscall 259
-
-    incr .0
-    cmp .0, .12
-    jl list
-    ret
+    load '\a'
+    syscall 258
 
 label _exit_
     hlt

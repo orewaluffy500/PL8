@@ -1,17 +1,17 @@
 add_rules("mode.debug", "mode.release")
 set_languages("c++20")
 
-target("vm")
+target("pl8")
     set_kind("binary")  
     add_files("src/executor.cpp")
     
-target("asm")
+target("pl8a")
     set_kind("binary")  
     add_files("src/assembler.cpp")
     
-target("test")
-    set_kind("binary")  
-    add_files("src/main.cpp")
+-- target("test")
+--     set_kind("binary")  
+--     add_files("src/main.cpp")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io

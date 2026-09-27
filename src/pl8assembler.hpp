@@ -4,6 +4,7 @@
 #include "pl8const.hpp"
 #include <cctype>
 #include <format>
+#include <iostream>
 #include <regex>
 #include <string>
 #include <unordered_map>
@@ -30,8 +31,8 @@ namespace pl8::assembler {
     };
 
 
-    inline void fault(const std::string& message, int where){
-        std::printf("tokenization fault: %s (at column %d)\n", message.c_str(), where);
+    inline void fault(const std::string& message, Position pos){
+        std::printf("tokenization fault: %s (at line %d, column %d of file '%s')\n", message.c_str(), pos.line, pos.column, pos.file_name.data());
         std::exit(2);
     }
 
@@ -127,6 +128,11 @@ namespace pl8::assembler {
                     advance();
                 }
 
+                else if (current == '\''){
+                    tokens.push_back(make_character());
+                    advance();
+                }
+
                 else if (current == '\n'){
                     tokens.push_back(Token(TT_NEWLINE, pos));
                     advance();
@@ -152,7 +158,7 @@ namespace pl8::assembler {
                     advance();
                 }
                 else {
-                    advance();
+                    fault(std::format("illegal character '{}'", current), pos);
                 }
             }
 
@@ -160,6 +166,45 @@ namespace pl8::assembler {
             return tokens;
         }
 
+        Token make_character(){
+            char final = 0;
+            Position start = pos;
+            
+            advance();
+            
+            if (current == '\\'){
+                advance();
+                switch (current){
+                    case 'n':
+                    final = '\n';
+                    break;
+                    
+                    case 'a':
+                    final = '\'';
+                    break;
+
+                    case 't':
+                    final = '\t';
+                    break;
+
+                    case '\\':
+                    final = '\\';
+                    break;
+
+                    default:
+                    fault(std::format("invalid escape char: {}", current), pos);
+                }
+            } else {
+                final = current;
+            }
+
+            advance();
+            if (current != '\''){
+                fault("expected apostrophe!", pos);
+            }
+
+            return Token(TT_INT, start, std::to_string((int) final));
+        }
 
         Token make_ident(){
             std::string final = "";
@@ -201,6 +246,8 @@ namespace pl8::assembler {
 
             final = std::regex_replace(final, std::regex("\\q"), "\"");
             final = std::regex_replace(final, std::regex("\\n"), "\n");
+            final = std::regex_replace(final, std::regex("\\t"), "\t");
+            final = std::regex_replace(final, std::regex("\\\\"), "\\");
 
             return Token(TT_STRING, start, final);
         }

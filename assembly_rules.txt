@@ -4,14 +4,21 @@ PL8 assembly is very simple.
 There are registers 0 to 128 (129 registers in total).
 Allocations are basically arrays and you store their addresses not the allocation itself.
 
+<( ESCAPE CODES )>
+
+\n: newline
+\t: tab
+\q: quote (only works for strings)
+\a: apostrophe (only works for char literals)
+\\: normal backslash, for strings you can also just use the normal one, but for characters use this.
 
 <( GRAMMAR DEFINITIONS )>
 
 [register]      : an index of a register, prefixed with a dot
                 ex. - ".12", ".6"
 
-[constant]      : a int constant
-                ex. - 123
+[constant]      : a int constant, it can also be a character which just gets turned into it's ASCII value
+                ex. - 123, 'A'
 
 "[string]"      : a string constant
                 ex. - "hello", "bye"

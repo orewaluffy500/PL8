@@ -11,16 +11,16 @@ I even made an assembler for it.
 ## INSTRUCTIONS
 1. To assemble a program do this
 
-`xmake run --workdir=. asm` or if you've compiled it then just `asm.exe`
+`xmake run --workdir=. pl8a` or if you've compiled it then just `pl8a.exe`
 
   It'll then ask for a file name, That's your PL8 assembly file.
   It'll produce a new file with the same name but `.pa` at the end
 
 2. To run your program do this
 
-`xmake run --workdir=. vm` or if you've compiled it then just `vm.exe`
+`xmake run --workdir=. pl8` or if you've compiled it then just `pl8.exe`
 
-  It'll ask for a executable file name, give it the name of the file that `asm.exe` produced.
+  It'll ask for a executable file name, give it the name of the file that `pl8a.exe` produced.
   Then it'll run the program, Also it'll warn you about any invalid instructions but it wont stop.
 
 # DOCUMENTATION
