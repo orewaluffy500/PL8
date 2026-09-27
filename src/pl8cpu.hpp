@@ -148,54 +148,63 @@ namespace pl8 {
         bool cycle(){
             int instruction = get_next();
 
-            if (instruction == inst::HLT){
+            switch (instruction){
+            case inst::HLT: {
                 return false;
             }
 
             // LOADING
-            else if (instruction == inst::LD){
+            case inst::LD: {
                 int value = get_next();
                 load(value);
+                break;
             }
-            else if (instruction == inst::LDR){
+            case inst::LDR: {
                 int regs = get_next();
                 load(get_register(regs));
+                break;
             }
 
             // REGISTERS
-            else if (instruction == inst::SETR){
+            case inst::SETR: {
                 set_register(get_next(), loaded());
+                break;
             }
-            else if (instruction == inst::MOV){
+            case inst::MOV: {
                 int regist = get_next();
                 int value = get_next_value();
                 set_register(regist, value);
+                break;
             }
-            else if (instruction == inst::INCR){
+            case inst::INCR: {
                 int regs = get_next();
                 get_register(regs);
                 register_file[regs]++;
+                break;
             }
-            else if (instruction == inst::DECR){
+            case inst::DECR: {
                 int regs = get_next();
                 get_register(regs);
                 register_file[regs]--;
+                break;
             }
 
             // ALLOCATIONS
-            else if (instruction == inst::ALLC){
+            case inst::ALLC: {
                 int size = get_next_value();
                 load(addr_counter);
                 allocate(size);
+                break;
             }
-            else if (instruction == inst::RD){
+            case inst::RD: {
                 int addr = loaded();
                 int index = get_next_value();
                 auto& alloc = get_alloc(addr);
 
                 load(alloc.get(index));
+                break;
             }
-            else if (instruction == inst::WR){
+            case inst::WR: {
                 int addr = loaded();
                 int index = get_next_value();
                 int value = get_next_value();
@@ -203,121 +212,142 @@ namespace pl8 {
 
                 alloc.get(index);
                 alloc.data[index] = value;
+                break;
             }
-            else if (instruction == inst::SETA){
+            case inst::SETA: {
                 int addr = loaded();
                 int value = get_next_value();
                 auto& alloc = get_alloc(addr);
 
                 alloc.fill(value);
+                break;
             }
 
             // SYSCALL
-            else if (instruction == inst::SYSCALL){
+            case inst::SYSCALL: {
                 int syscall = get_next();
                 if (syscall_map.contains(syscall)){
                     syscall_map[syscall](*this);
                 } else {
                     fault(std::format("unexpected syscall '{}'", syscall), pc);
                 }
+                break;
             }
 
             // JUMP
-            else if (instruction == inst::JMP){
+            case inst::JMP: {
                 int where = get_next();
                 jump(where);
+                break;
             }
 
-            else if (instruction == inst::CALL){
+            case inst::CALL: {
                 int where = get_next();
                 call_stack.push_back(pc);
                 jump(where);
+                break;
             }
 
-            else if (instruction == inst::RET){
+            case inst::RET: {
                 ret();
+                break;
             }
 
-            else if (instruction == inst::JZ){
+            case inst::JZ: {
                 int where = get_next();
                 if (loaded() == 0) jump(where);
+                break;
             }
 
-            else if (instruction == inst::JNZ){
+            case inst::JNZ: {
                 int where = get_next();
                 if (loaded() != 0) jump(where);
+                break;
             }
 
-            else if (instruction == inst::CMP){
+            case inst::CMP: {
                 int value1 = get_next_value();
                 int value2 = get_next_value();
 
                 comp_info.greater = value1 > value2;
                 comp_info.less = value1 < value2;
                 comp_info.equal = value1 == value2;
+                break;
             }
             
-            else if (instruction == inst::JL){
+            case inst::JL: {
                 int where = get_next();
                 if (comp_info.less) jump(where);
+                break;
             }
 
-            else if (instruction == inst::JG){
+            case inst::JG: {
                 int where = get_next();
                 if (comp_info.greater) jump(where);
+                break;
             }
 
-            else if (instruction == inst::JLE){
+            case inst::JLE: {
                 int where = get_next();
                 if (comp_info.less || comp_info.equal) jump(where);
+                break;
             }
 
-            else if (instruction == inst::JGE){
+            case inst::JGE: {
                 int where = get_next();
                 if (comp_info.greater || comp_info.equal) jump(where);
+                break;
             }
 
-            else if (instruction == inst::JE){
+            case inst::JE: {
                 int where = get_next();
                 if (comp_info.equal) jump(where);
+                break;
             }
 
-            else if (instruction == inst::JNE){
+            case inst::JNE: {
                 int where = get_next();
                 if (!comp_info.equal) jump(where);
+                break;
             }
 
 
             // Arithmetic operations
 
-            else if (instruction == inst::ADD){
+            case inst::ADD: {
                 ao_info.type = ArithOper::ADD;
                 ao_info.feed(get_next_value(), get_next_value());
                 load(ao_info.evaluate());
+                break;
             }
 
-            else if (instruction == inst::SUB){
+            case inst::SUB: {
                 ao_info.type = ArithOper::SUB;
                 ao_info.feed(get_next_value(), get_next_value());
                 load(ao_info.evaluate());
+                break;
             }
 
-            else if (instruction == inst::MUL){
+            case inst::MUL: {
                 ao_info.type = ArithOper::MUL;
                 ao_info.feed(get_next_value(), get_next_value());
                 load(ao_info.evaluate());
+                break;
             }
 
-            else if (instruction == inst::DIV){
+            case inst::DIV: {
                 ao_info.type = ArithOper::DIV;
                 ao_info.feed(get_next_value(), get_next_value());
                 load(ao_info.evaluate());
+                break;
             }
 
-            else if (instruction == inst::POW){
+            case inst::POW: {
                 ao_info.type = ArithOper::POW;
                 ao_info.feed(get_next_value(), get_next_value());
                 load(ao_info.evaluate());
+                break;
+            }
             }
 
             return true;
