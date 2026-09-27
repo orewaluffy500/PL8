@@ -388,11 +388,11 @@ namespace pl8 {
             });
 
             set_syscall(std_syscall::PINT, [](auto& vm){
-                std::printf("%d", vm.loaded());
+                std::cout << vm.loaded();
             });
 
             set_syscall(std_syscall::PCHAR, [](auto& vm){
-                std::printf("%c", vm.loaded());
+                std::cout << (char) vm.loaded();
             });
 
             set_syscall(std_syscall::PSTR, [](auto& vm){
@@ -400,34 +400,37 @@ namespace pl8 {
                 auto& alloc = vm.get_alloc(addr);
                 int index = 0;
                 while (index < alloc.size && alloc.get(index) != 0){
-                    std::printf("%c", alloc.get(index));
+                    std::cout << (char) alloc.get(index);
                     index++;
                 }
+
+                std::fflush(stdout);
             });
 
             set_syscall(std_syscall::RINT, [](auto& vm){
                 int x;
-                std::scanf("%d", &x);
-                std::fflush(stdin);
-
+                std::cin >> x;
                 vm.load(x);
             });
 
             set_syscall(std_syscall::RCHAR, [](auto& vm){
                 char x;
-                std::scanf("%c", &x);
-                std::fflush(stdin);
-
+                std::cin >> x;
                 vm.load(x);
             });
 
             set_syscall(std_syscall::RSTR, [](auto& vm){
                 std::string x;
+                std::cin >> std::ws;
                 std::getline(std::cin, x);
 
                 auto& alloc = vm.get_alloc(vm.loaded());
-                
-                std::copy_n(x.begin(), std::min(x.size(), alloc.data.size()), alloc.data.begin());
+
+                std::copy_n(
+                    x.begin(),
+                    std::min(x.size(), alloc.data.size()),
+                    alloc.data.begin()
+                );
             });
 
             set_syscall(std_syscall::SLEN, [](auto& vm){

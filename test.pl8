@@ -1,22 +1,44 @@
 label _main_
     allc 64
-    syscall 514     ; read the name
-    mov .0, $       ; store the string address in register 0
+    mov .10, $          ; store array in reg 10
+    mov .11, 64         ; length in reg 11
+    mov .12, 0          ; iterator in reg 12
+    call register
+    call list
 
-    allc 32
-    str "hello, "   ; make a new string
-    syscall 259     ; print it
+    jmp _exit_
 
-    ; we'll override the accumulator (which currently holds address for greet string)
-    ; since we don't need to store the greeting string. ("hello, ")
-    load .0
+label register
+    allc 128
+    str "enter a name: "
+    syscall 259
+    fill 0
+    syscall 514
 
-    ; now print the name
+    ; store name
+    mov .96, $
+    load .10
+    setx .12, .96
+    incr .12            ; increment iterator
+
+    allc 128
+    str "type 0 if you want to stop: "
+    syscall 259
+    syscall 512
+
+    ; if not zero
+    jnz register        ; redo
+    ret                 ; otherwise return.
+
+label list
+    load .10
+    getx .0
     syscall 259
 
-    ; and finally we'll print a newline
-    load 10         ; line feed ASCII code
-    syscall 258     ; print as ASCII
+    incr .0
+    cmp .0, .12
+    jl list
+    ret
 
 label _exit_
     hlt
