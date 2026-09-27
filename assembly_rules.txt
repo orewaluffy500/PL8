@@ -1,0 +1,62 @@
+PL8 assembly is very simple.
+
+<( GRAMMAR DEFINITIONS )>
+
+[register]      : an index of a register, prefixed with a dot
+                ex. - ".12", ".6"
+
+[constant]      : a int constant
+                ex. - 123
+
+"[string]"      : a string constant
+                ex. - "hello", "bye"
+            
+[accum]         : a '$' character, represents the current value in the accumulator
+
+[value]         : either a [constant] or a [register] or an [accum]
+
+[identifier]    : the name of a label or others.
+
+<( INSTRUCTIONS )>
+
+mov [register], [value]      : set a register
+dup [register], [register]      : duplicate value of 1st register to 2nd register
+incr [register]                 : increment a register
+decr [register]                 : decrement a register
+
+load [value]                    : load a value into the accumulator
+dmp [register]                  : dump the value of the accumulator into a register
+
+jmp [identifier]                : jump to a label
+call [identifier]               : jump to a label and push pc onto stack
+ret                             : pop the top pc off the call stack and return to it
+
+jz [identifier]                 : jump to a label if accum is zero
+jnz [identifier]                : jump to a label if accum isn't zero
+
+cmp [value], [value]            : compare two values and store results
+je [identifier]                 : jump to a label if comparison result in equality
+jne [identifier]                : jump to a label if comparison result in non-equality
+jg [identifier]                 : jump to a label if comparison result in greater
+jge [identifier]                : jump to a label if comparison result in greater or equal
+jl [identifier]                 : jump to a label if comparison result in less
+jle [identifier]                : jump to a label if comparison result in less or equal
+
+add [value], [value]            : add two values and put result in accumulator
+sub [value], [value]            : subtract two values and put result in accumulator
+mul [value], [value]            : multiply two values and put result in accumulator
+div [value], [value]            : divide two values and put result in accumulator
+pow [value], [value]            : power two values and put result in accumulator
+
+allc [value]                    : allocate [value] amount of space and put the address in accumulator
+setx [value], [value]           : set an element of an allocation, accumulator is the address
+getx [value]                    : get the element of an allocation back into the accumulator, accumulator is the address
+fill [value]                    : fill an allocation with a value, accumulator is the address
+str "[string]"                  : expands into `setx` instructions that set each element of the currently loaded allocation (in accum) 
+                                to each character of the given string.
+                                very useful.
+
+label [identifier]              : define a label
+
+hlt                             : halt the program immediately
+nop                             : does nothing, can be used as padding in the machine code

@@ -1,0 +1,56 @@
+<( DEFINITIONS )>
+
+<const> : a literal value
+<index> : an <index> to a register
+<value> : either "CONSTANT, <const>" or "ACCUM" or "REGIST, <index>"
+
+<( OPCODES )>
+
+
+HLT     : OPCODE                    # exit program immediately
+
+LD      : OPCODE <const>            # load constant into accum
+LDR     : OPCODE <index>            # load value of register at <index> into accum
+
+SETR    : OPCODE <index>            # copy the accum's value into given register
+MOV     : OPCODE <index> <value>    # copy <value> into given register.
+INCR    : OPCODE <index>            # increment given register
+DECR    : OPCODE <index>            # decrement given register
+
+ALLC    : OPCODE <value>            # allocate memory, use <value> as the size and write address into accum.
+RD      : OPCODE <value>            # use accum as the memory address, <value> is the index, read into accum
+WR      : OPCODE <value1> <value2>  # use accum as the memory address, <value1> is the index, <value2> is the <value>.
+SETA    : OPCODE <value>            # use accum as the memory address, fill given allocation with <value>
+
+JMP     : OPCODE <const>            # jump to <const> in program memory
+CALL    : OPCODE <const>            # jump to <const> in program memory and push original PC onto call stack
+RET     : OPCODE                    # return to the PC at the top of the call stack or do nothing if call stack is empty
+JZ      : OPCODE <const>            # jump if accum is zero
+JNZ     : OPCODE <const>            # jump if accum isn't zero
+CMP     : OPCODE <value1> <value2>  # compare two values and store the comparison results
+JL      : OPCODE                    # jump if comparison result was less than
+JG      : OPCODE                    # jump if comparison result was greater than
+JLE     : OPCODE                    # jump if comparison result was less than or equal to
+JGE     : OPCODE                    # jump if comparison result was greater than or equal to
+JE      : OPCODE                    # jump if comparison result was equal
+JNE     : OPCODE                    # jump if comparison result wasn't equal
+
+ADD     : OPCODE <value1> <value2>  # add operands and result into accum.
+SUB     : OPCODE <value1> <value2>  # subtract operands and result into accum.
+DIV     : OPCODE <value1> <value2>  # divide operands and result into accum.
+MUL     : OPCODE <value1> <value2>  # multiply operands and result into accum.
+POW     : OPCODE <value1> <value2>  # power operands and result into accum.
+
+SYSCALL : OPCODE syscall            # do a syscall.
+
+<( SYSCALLS )>
+
+0x100           : print "soup\n"
+
+0x101           : print the loaded value as an integer
+
+0x102           : print the loaded value as a character (0-255)
+
+0x103           : use the accum as an address to an allocation
+                the allocation must contain integers (0-255) which are the characters for the string
+                it prints each character until it reaches 0 which is a string-terminator.

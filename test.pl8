@@ -1,0 +1,8 @@
+label _main_
+    allc 64
+    syscall 514 ; read
+    syscall 260 ; lengthen string
+    syscall 257 ; print length
+
+label _exit_
+    hlt
